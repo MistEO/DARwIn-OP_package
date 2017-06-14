@@ -5,7 +5,7 @@
 
 void got_signal(int);
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
     signal(SIGABRT, got_signal);
     signal(SIGTERM, got_signal);
