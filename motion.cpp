@@ -51,8 +51,8 @@ Motion::~Motion()
 {
 	using namespace Robot;
 	Walking::GetInstance()->Stop();
-    while (Walking::GetInstance()->IsRunning())
-        usleep(8 * 1000);
+	while (Walking::GetInstance()->IsRunning())
+		usleep(8 * 1000);
 	MotionManager::GetInstance()->RemoveModule((MotionModule*)Walking::GetInstance());
 	Action::GetInstance()->Start(9);
 	while (Action::GetInstance()->IsRunning())
@@ -105,19 +105,20 @@ bool Motion::fall_up()
 	if(MotionStatus::FALLEN != STANDUP)
 	{
 		Walking::GetInstance()->Stop();
-		while(Walking::GetInstance()->IsRunning() == 1) usleep(8000);
+		while(Walking::GetInstance()->IsRunning() == 1)
+			usleep(8000);
 
-        Action::GetInstance()->m_Joint.SetEnableBody(true, true);
+		Action::GetInstance()->m_Joint.SetEnableBody(true, true);
 
-        if(MotionStatus::FALLEN == FORWARD)
-            Action::GetInstance()->Start(10);   //Forwrad getup
-        else if(MotionStatus::FALLEN == BACKWARD)
-            Action::GetInstance()->Start(11);   //Backward getup
+		if(MotionStatus::FALLEN == FORWARD)
+			Action::GetInstance()->Start(10);   //Forwrad getup
+		else if(MotionStatus::FALLEN == BACKWARD)
+			Action::GetInstance()->Start(11);   //Backward getup
 
-        while(Action::GetInstance()->IsRunning() == 1) usleep(8000);
+		while(Action::GetInstance()->IsRunning() == 1) usleep(8000);
 
-        Head::GetInstance()->m_Joint.SetEnableHeadOnly(true, true);
-        Walking::GetInstance()->m_Joint.SetEnableBodyWithoutHead(true, true);
+		Head::GetInstance()->m_Joint.SetEnableHeadOnly(true, true);
+		Walking::GetInstance()->m_Joint.SetEnableBodyWithoutHead(true, true);
 		return true;
 	}
 	return false;
@@ -135,7 +136,7 @@ void Motion::head_move(int x, int y, bool home)
 
 void Motion::action(int index)
 {
-    Robot::Action::GetInstance()->Start(index);
+	Robot::Action::GetInstance()->Start(index);
 	while (Robot::Action::GetInstance()->IsRunning())
 		usleep(8 * 1000);
 }
