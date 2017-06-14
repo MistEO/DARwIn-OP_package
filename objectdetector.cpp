@@ -71,7 +71,7 @@ int ObjectDetector::process_by_color(int wait_msec)
 		imshow("Source", source_image);
 	}
 	Mat hsv_image;
-	cvtColor(source_image, hsv_image, COLOR_BGR2HSV);	//转换为HSV色彩空间
+	cvtColor(source_image, hsv_image, CV_BGR2HSV);	//转换为HSV色彩空间
 	Mat binary_image;
 	inRange(hsv_image, lower_color(), upper_color(), binary_image);	//按范围二值化
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
