@@ -19,6 +19,7 @@ class ObjectDetector
 public:
 	//构造函数，参数为名称、显示窗口标识
 	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow);
+	//析构函数，会保存颜色的值为文件
 	~ObjectDetector();
 
 	//刷新视频画面，参数为刷新次数
@@ -28,7 +29,7 @@ public:
 	static const int cap_width;
 	static const int cap_height;
 
-	//调整颜色，析构函数会自动
+	//调整颜色，析构函数会自动保存
 	void adjust_color();
 	//按颜色处理图像，参数为处理间隔时间（毫秒）
 	int process_by_color(int wait_msec);
