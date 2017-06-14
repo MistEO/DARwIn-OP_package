@@ -1,4 +1,4 @@
-SOURCES = sample.cpp motion.cpp
+SOURCES = sample.cpp motion.cpp objectdetector.cpp
 TARGET = Run
 
 
@@ -9,7 +9,7 @@ INCLUDE_DIRS = -I/darwin/Linux/include -I/darwin/Framework/include
 CXX = g++
 CXXFLAGS += -O2 -DLINUX -Wall $(INCLUDE_DIRS)
 #CXXFLAGS += -O2 -DDEBUG -DLINUX -Wall $(INCLUDE_DIRS)
-#CXXFLAGS += `pkg-config opencv --cflags --libs`
+CXXFLAGS += `pkg-config opencv --cflags --libs`
 LFLAGS += -lpthread -ljpeg -lrt
 
 all: $(TARGET)
