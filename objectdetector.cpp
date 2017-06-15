@@ -81,19 +81,19 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 
 	vector<vector<Point> > all_contours;
 	vector<Vec4i> hierarchy;
-	findContours(binary_image, all_contours, hierarchy,
+	Mat contours_image = binary_image.clone();
+	findContours(contours_image, all_contours, hierarchy,
 		CV_RETR_TREE, CV_CHAIN_APPROX_NONE);		//查找轮廓
 	vector<Rect> all_bound;
 	for (vector<vector<Point> >::iterator i = all_contours.begin();
 		i != all_contours.end(); ++i) {
 		Rect temp = boundingRect(Mat(*i));	//从轮廓获取矩形
-		if (rect_filter & Vertical) {
+		if (rect_filter & Vertical) {		//过滤掉不是竖立着的
 			if (temp.width > temp.height)
 				continue;
 		}
 		all_bound.push_back(temp);
 	}
-
 	rect = Rect(cap_width / 2, cap_height / 2, 0, 0);
 	vector<cv::Rect>::iterator biggest_rect_iter
 		= std::max_element(all_bound.begin(), all_bound.end(), rect_area_cmp);	//获取面积最大的矩形的迭代器
@@ -101,23 +101,24 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 		rect = *biggest_rect_iter;
 	}
 
+	//显示的窗口
 	if (show_flag != NotShow) {
 		Mat show_image = Mat::zeros(source_image.size(), source_image.type());
-		if (show_flag & ShowSource) {
-			show_image = source_image;
+		if (show_flag & ShowSource) {	//显示原图片
+			show_image = source_image.clone();
 		}
-		if (show_flag & ShowBinary) {
+		if (show_flag & ShowBinary) {	//显示二值化部分
 			Mat bgr_binary_image;
-			cvtColor(binary_image, bgr_binary_image, CV_GRAY2BGR);
+			cvtColor(binary_image, bgr_binary_image, CV_GRAY2BGR);	//转换为三通道，以合并
 			const double alpha = 0.5, beta = 0.5, gamma = 0.0;
-			addWeighted(show_image, alpha, bgr_binary_image, beta, gamma, show_image);
+			addWeighted(show_image, alpha, bgr_binary_image, beta, gamma, show_image);	//线性叠加
 		}
-		if (show_flag & ShowDrawing) {
+		if (show_flag & ShowDrawing) {	//划线和矩形
 			line(show_image, cv::Point(show_image.cols / 2, 0),
 				Point(show_image.cols / 2, show_image.rows),
 				Scalar(255, 0, 0), 2);		//画图像中轴线
-			for (vector<Rect>::iterator i = all_bound.begin(); i != all_bound.end(); ++i) {
-				rectangle(show_image, *i, cv::Scalar(0, 0, 0), 1);	//画所有矩形
+			for (vector<Rect>::iterator i = all_bound.begin(); i != all_bound.end(); ++i) {	//画所有矩形
+				rectangle(show_image, *i, cv::Scalar(0, 0, 0), 1);
 			}
 			line(show_image,
 				Point(rect.x + rect.width / 2, rect.y),
@@ -125,7 +126,7 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 				Scalar(0, 0, 255), 2);		//画最大矩形中线
 			rectangle(show_image, rect, cv::Scalar(255, 255, 255), 2);	//画最大矩形
 		}
-		imshow(obj_name, show_image);
+		cv::imshow(obj_name, show_image);
 	}
 	return waitKey(wait_msec);
 }

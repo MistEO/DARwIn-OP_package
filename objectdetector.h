@@ -13,6 +13,7 @@ enum ShowImage {
 	ShowSource = 1,
 	ShowBinary = 2,
 	ShowDrawing = 4,
+	ShowAll = ShowSource | ShowBinary | ShowDrawing
 };
 
 //矩形过滤器选项
