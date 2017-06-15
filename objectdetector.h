@@ -7,16 +7,18 @@
 
 #include <string>
 
+//显示窗口标识
 enum ShowImage {
 	NotShow = 0,
 	ShowSource = 1,
 	ShowBinary = 2,
-	ShowDrawing = 4
+	ShowDrawing = 4,
 };
+
+//矩形过滤器选项
 enum RectFilter {
 	NotFilter = 0,
 	Vertical = 1,
-
 };
 
 class ObjectDetector
