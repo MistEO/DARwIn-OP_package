@@ -42,10 +42,6 @@ public:
 	//按颜色处理图像，参数为处理间隔时间（毫秒）
 	int process_by_color(int wait_msec, int rect_filter = NotFilter);
 
-	//返回上下限颜色标量（类似容器，看不懂先忽略）
-	cv::Scalar & lower_color();
-	cv::Scalar & upper_color();
-
 	//返回物体的宽度、高度、位置、是否存在
 	int width() const;
 	int height() const;
@@ -61,15 +57,15 @@ private:
 	void load();
 	void save();
 
+	cv::Vec3i & get_lower_color();
+	cv::Vec3i & get_upper_color();
+
 	static cv::VideoCapture capture;
 	
 	const std::string obj_name;
 	int show_flag;
-	
-	cv::Scalar lower_limit_color,
-		upper_limit_color;
-	int lower_hue, lower_saturation, lower_value,
-		upper_hue, upper_saturation, upper_value;
+
+	cv::Vec3i lower_color, upper_color;
 	cv::Rect rect;
 	
 };

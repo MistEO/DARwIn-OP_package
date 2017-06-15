@@ -1,7 +1,6 @@
 #include "objectdetector.h"
 
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -12,9 +11,8 @@ const double ObjectDetector::cap_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
 ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag)
 	:obj_name(obj_name), show_flag(imshow_flag),
-	lower_hue(0), lower_saturation(0), lower_value(0),
-	upper_hue(180), upper_saturation(255), upper_value(255),
-	rect(0, 0, 0, 0)
+	lower_color(0, 0, 0), upper_color(180, 255, 255),
+	rect(cap_width / 2, cap_height / 2, 0, 0)
 {
 	assert(capture.isOpened());
 	load();
@@ -27,21 +25,22 @@ ObjectDetector::~ObjectDetector()
 
 void ObjectDetector::load()
 {
-	std::ifstream fs(obj_name.c_str(), std::ios::in);
-	if (!fs.is_open()) {
+	cv::FileStorage fs(obj_name, cv::FileStorage::READ);
+	if (!fs.isOpened()) {
+		std::clog << "Cannot read file: " << obj_name << std::endl;
 		return;
 	}
-	fs >> lower_hue >> lower_saturation >> lower_value
-		>> upper_hue >> upper_saturation >> upper_value;
-	fs.close();
+	fs["lower_color"] >> lower_color;
+	fs["upper_color"] >> upper_color;
+	fs.release();
 }
 
 void ObjectDetector::save()
 {
-	std::ofstream fs(obj_name.c_str(), std::ios::out);
-	fs << lower_hue << " " << lower_saturation << " " << lower_value << std::endl
-		<< upper_hue << " " << upper_saturation << " " << upper_value << std::endl;
-	fs.close();
+	cv::FileStorage fs(obj_name, cv::FileStorage::WRITE);
+	fs << "lower_color" << "[" << lower_color[0] << lower_color[1] << lower_color[2] << "]";
+	fs << "upper_color" << "[" << upper_color[0] << upper_color[1] << upper_color[2] << "]";
+	fs.release();
 }
 
 void ObjectDetector::refresh_capture(int times)
@@ -64,14 +63,14 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 	Mat source_image;
 	capture >> source_image;
 	if (source_image.empty()) {
-		std::cerr << "The source image is empty";
-		return -2;
+		std::cerr << "The source image is empty" << std::endl;
+		return -1;
 	}
 
 	Mat hsv_image;
 	cvtColor(source_image, hsv_image, CV_BGR2HSV);	//转换为HSV色彩空间
 	Mat binary_image;
-	inRange(hsv_image, lower_color(), upper_color(), binary_image);	//按范围二值化
+	inRange(hsv_image, get_lower_color(), get_upper_color(), binary_image);	//按范围二值化
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
 		getStructuringElement(MORPH_RECT, Size(10, 10)));	//开操作降噪
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
@@ -137,24 +136,22 @@ void ObjectDetector::adjust_color()
 
 	const std::string adjust_window_name = obj_name + " - Adjust Color";
 	cv::namedWindow(adjust_window_name, cv::WINDOW_AUTOSIZE);
-	createTrackbar("Low H", adjust_window_name, &lower_hue, 180);
-	createTrackbar("Up H", adjust_window_name, &upper_hue, 180);
-	createTrackbar("Low S", adjust_window_name, &lower_saturation, 255);
-	createTrackbar("Up S", adjust_window_name, &upper_saturation, 255);
-	createTrackbar("Low V", adjust_window_name, &lower_value, 255);
-	createTrackbar("Up V", adjust_window_name, &upper_value, 255);
+	createTrackbar("Low H", adjust_window_name, &lower_color[0], 180);
+	createTrackbar("Up H", adjust_window_name, &upper_color[0], 180);
+	createTrackbar("Low S", adjust_window_name, &lower_color[1], 255);
+	createTrackbar("Up S", adjust_window_name, &upper_color[1], 255);
+	createTrackbar("Low V", adjust_window_name, &lower_color[2], 255);
+	createTrackbar("Up V", adjust_window_name, &upper_color[2], 255);
 }
 
-cv::Scalar & ObjectDetector::lower_color()
+cv::Vec3i & ObjectDetector::get_lower_color()
 {
-	lower_limit_color = cv::Scalar(lower_hue, lower_saturation, lower_value);
-	return lower_limit_color;
+	return lower_color;
 }
 
-cv::Scalar & ObjectDetector::upper_color()
+cv::Vec3i & ObjectDetector::get_upper_color()
 {
-	upper_limit_color = cv::Scalar(upper_hue, upper_saturation, upper_value);
-	return upper_limit_color;
+	return upper_color;
 }
 
 int ObjectDetector::width() const
