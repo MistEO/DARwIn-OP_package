@@ -27,10 +27,13 @@ int main(int argc, char ** argv)
 	//设置行走速度，第一个参数是直行速度，第二个是左右速度（左正右负），第三个参数为加速所用时间（毫秒），可以不填
 	Motion::ins().walk(x_speed, 0, speed_up_msec);
 	while (true) {
-		//处理一帧图像，参数为延时（毫秒）
-		obj.process_by_color(10);
-		//通过postion成员函数可以获取物体的位置，width成员函数可以获取物体的宽度，更多函数见objectdetector.h文件
-		std::cout << "Postion: " << obj.postion() << " Width: " << obj.width() << std::endl;
+		//处理一帧图像，参数为帧间隔（毫秒）,第二个参数为过滤选项，可不填
+		obj.process_by_color(10, Vertical);
+		//判断是否捕获到矩形
+		if (!obj.empty()) {
+			//通过postion成员函数可以获取物体的位置，width成员函数可以获取物体的宽度，更多函数见objectdetector.h文件
+			std::cout << "Postion: " << obj.postion() << " Width: " << obj.width() << std::endl;
+		}
 		//检测跌倒，并自动爬起来，返回true
 		if (Motion::ins().fall_up()) {
 			//爬起来之后机器人是不动的，重新开始行走并设置速度

@@ -13,6 +13,11 @@ enum ShowImage {
 	ShowBinary = 2,
 	ShowDrawing = 4
 };
+enum RectFilter {
+	NotFilter = 0,
+	Vertical = 1,
+
+};
 
 class ObjectDetector
 {
@@ -26,26 +31,27 @@ public:
 	void refresh_capture(int times = 2);
 
 	//视频宽度、高度
-	static const int cap_width;
-	static const int cap_height;
+	static const double cap_width;
+	static const double cap_height;
 
 	//调整颜色，析构函数会自动保存
 	void adjust_color();
 	//按颜色处理图像，参数为处理间隔时间（毫秒）
-	int process_by_color(int wait_msec);
+	int process_by_color(int wait_msec, int rect_filter = NotFilter);
 
 	//返回上下限颜色标量（类似容器，看不懂先忽略）
 	cv::Scalar & lower_color();
 	cv::Scalar & upper_color();
 
-	//返回物体的宽度、高度、位置
+	//返回物体的宽度、高度、位置、是否存在
 	int width() const;
 	int height() const;
 	int postion() const;
+	bool empty() const;
 	
 	//获取显示窗口标识，同时也可以直接设置（obj.imshow_flag() = ShowBinary)
 	int & imshow_flag();
-	//获取物体名
+	//返回物体名
 	const std::string object_name() const;
 
 private:

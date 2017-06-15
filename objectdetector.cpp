@@ -7,8 +7,8 @@
 #include <cassert>
 
 cv::VideoCapture ObjectDetector::capture(0);
-const int ObjectDetector::cap_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-const int ObjectDetector::cap_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+const double ObjectDetector::cap_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+const double ObjectDetector::cap_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
 ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag)
 	:obj_name(obj_name), show_flag(imshow_flag),
@@ -57,7 +57,7 @@ inline bool rect_area_cmp(cv::Rect& lhs, const cv::Rect& rhs)
 	return lhs.area() < rhs.area();
 }
 
-int ObjectDetector::process_by_color(int wait_msec)
+int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 {
 	using namespace cv;
 
@@ -91,18 +91,21 @@ int ObjectDetector::process_by_color(int wait_msec)
 	vector<Rect> all_bound;
 	for (vector<vector<Point> >::iterator i = all_contours.begin();
 		i != all_contours.end(); ++i) {
-		all_bound.push_back(boundingRect(Mat(*i)));	//从轮廓获取矩形
+		Rect temp = boundingRect(Mat(*i));	//从轮廓获取矩形
+		if (rect_filter & Vertical) {
+			if (temp.width > temp.height)
+				continue;
+		}
+		all_bound.push_back(temp);
 	}
 
+	rect = Rect(cap_width/2, cap_height/2, 0, 0);
 	vector<cv::Rect>::iterator biggest_rect_iter
 		= std::max_element(all_bound.begin(), all_bound.end(), rect_area_cmp);	//获取面积最大的矩形的迭代器
-
 	if (biggest_rect_iter != all_bound.end()) {		//若为.end()即没有最大的，则图像中没有轮廓
 		rect = *biggest_rect_iter;
 	}
-	else {
-		rect = Rect(0, 0, 0, 0);
-	}
+
 	if (show_flag & ShowDrawing) {
 		Mat drawing_image;
 		source_image.copyTo(drawing_image);
@@ -158,6 +161,11 @@ int ObjectDetector::height() const
 int ObjectDetector::postion() const
 {
 	return rect.tl().x + (rect.width / 2);
+}
+
+bool ObjectDetector::empty() const
+{
+	return rect.area() == 0;
 }
 
 int & ObjectDetector::imshow_flag()
