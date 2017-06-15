@@ -101,7 +101,7 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 		rect = *biggest_rect_iter;
 	}
 
-	if (!(show_flag & NotShow)) {
+	if (show_flag != NotShow) {
 		Mat show_image = Mat::zeros(source_image.size(), source_image.type());
 		if (show_flag & ShowSource) {
 			show_image = source_image;
