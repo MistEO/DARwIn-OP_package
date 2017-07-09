@@ -57,8 +57,8 @@ private:
 	void load();
 	void save();
 
-	cv::Vec3i & get_lower_color();
-	cv::Vec3i & get_upper_color();
+	cv::Scalar get_lower_color();
+	cv::Scalar get_upper_color();
 
 	static cv::VideoCapture capture;
 	
