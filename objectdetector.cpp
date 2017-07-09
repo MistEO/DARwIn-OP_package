@@ -144,12 +144,12 @@ void ObjectDetector::adjust_color()
 	createTrackbar("Up V", adjust_window_name, &upper_color[2], 255);
 }
 
-cv::Vec3i & ObjectDetector::get_lower_color()
+cv::Scalar ObjectDetector::get_lower_color()
 {
 	return lower_color;
 }
 
-cv::Vec3i & ObjectDetector::get_upper_color()
+cv::Scalar ObjectDetector::get_upper_color()
 {
 	return upper_color;
 }
