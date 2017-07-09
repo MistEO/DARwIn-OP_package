@@ -30,8 +30,14 @@ void ObjectDetector::load()
 		std::clog << "Cannot read file: " << obj_name << std::endl;
 		return;
 	}
-	fs["lower_color"] >> lower_color;
-	fs["upper_color"] >> upper_color;
+	cv::FileNode fn_lower = fs["lower_color"],
+		fn_upper = fs["upper_color"];
+	cv::FileNodeIterator it_lower = fn_lower.begin(),
+		it_upper = fn_upper.begin();
+	for (int i = 0; i != 3; ++i) {
+		lower_color[i] = static_cast<int>(*it_lower);
+		upper_color[i] = static_cast<int>(*it_upper);
+	}
 	fs.release();
 }
 
@@ -146,12 +152,12 @@ void ObjectDetector::adjust_color()
 
 cv::Scalar ObjectDetector::get_lower_color()
 {
-	return lower_color;
+	return cv::Scalar(lower_color);
 }
 
 cv::Scalar ObjectDetector::get_upper_color()
 {
-	return upper_color;
+	return cv::Scalar(upper_color);
 }
 
 int ObjectDetector::width() const
