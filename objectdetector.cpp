@@ -34,7 +34,7 @@ void ObjectDetector::load()
 		fn_upper = fs["upper_color"];
 	cv::FileNodeIterator it_lower = fn_lower.begin(),
 		it_upper = fn_upper.begin();
-	for (int i = 0; i != 3; ++i) {
+	for (int i = 0; i != 3; ++i, ++it_lower, ++it_upper) {
 		lower_color[i] = static_cast<int>(*it_lower);
 		upper_color[i] = static_cast<int>(*it_upper);
 	}

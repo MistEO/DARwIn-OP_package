@@ -26,9 +26,10 @@ int main(int argc, char ** argv)
 	Motion::ins().walk_start();
 	//设置行走速度，第一个参数是直行速度，第二个是左右速度（左正右负），第三个参数为加速所用时间（毫秒），可以不填
 	Motion::ins().walk(x_speed, 0, speed_up_msec);
-	while (true) {
+	int c = 0;
+	while (c != 27) {
 		//处理一帧图像，参数为帧间隔（毫秒）,第二个参数为过滤选项，可不填
-		obj.process_by_color(10, Vertical);
+		c = obj.process_by_color(10, Vertical);
 		//判断是否捕获到矩形
 		if (!obj.empty()) {
 			//通过postion成员函数可以获取物体的位置，width成员函数可以获取物体的宽度，更多函数见objectdetector.h文件
