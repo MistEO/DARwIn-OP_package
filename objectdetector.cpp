@@ -172,7 +172,22 @@ int ObjectDetector::height() const
 
 int ObjectDetector::postion() const
 {
-	return rect.tl().x + (rect.width / 2);
+	return x_axis();
+}
+
+int ObjectDetector::x_axis() const
+{
+	return rect.x + (rect.width / 2);
+}
+
+int ObjectDetector::y_axis() const
+{
+	return rect.y + (rect.height / 2);
+}
+
+std::pair<int, int> ObjectDetector::central_point() const
+{
+	return std::pair<int, int>(x_axis(), y_axis());
 }
 
 bool ObjectDetector::empty() const

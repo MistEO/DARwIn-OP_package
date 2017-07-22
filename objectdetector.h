@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 
 #include <string>
+#include <utility>
 
 //显示窗口标识
 enum ShowImage {
@@ -46,6 +47,7 @@ public:
 	int width() const;
 	int height() const;
 	int postion() const;
+	std::pair<int, int> central_point() const;
 	bool empty() const;
 	
 	//获取显示窗口标识，同时也可以直接设置（obj.imshow_flag() = ShowBinary)
@@ -56,6 +58,9 @@ public:
 private:
 	void load();
 	void save();
+
+	int x_axis() const;
+	int y_axis() const;
 
 	cv::Scalar get_lower_color();
 	cv::Scalar get_upper_color();
