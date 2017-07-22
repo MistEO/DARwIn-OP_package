@@ -9,9 +9,9 @@ cv::VideoCapture ObjectDetector::capture(0);
 const double ObjectDetector::cap_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
 const double ObjectDetector::cap_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag)
-	:obj_name(obj_name), show_flag(imshow_flag),
-	lower_color(0, 0, 0), upper_color(180, 255, 255),
+ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag, bool mixed_hue)
+	:obj_name(obj_name), show_flag(imshow_flag), mixed_flag(mixed_hue),
+	lower_color(0, 0, 0, 0), upper_color(180, 180, 255, 255),
 	rect(cap_width / 2, cap_height / 2, 0, 0)
 {
 	assert(capture.isOpened());
@@ -34,7 +34,12 @@ void ObjectDetector::load()
 		fn_upper = fs["upper_color"];
 	cv::FileNodeIterator it_lower = fn_lower.begin(),
 		it_upper = fn_upper.begin();
-	for (int i = 0; i != 3; ++i, ++it_lower, ++it_upper) {
+	for (int i = 0; i != 4; ++i, ++it_lower, ++it_upper) {
+		if (fn_lower.size() == 3 && i == 1) {
+			--it_lower;
+			--it_upper;
+			continue;
+		}
 		lower_color[i] = static_cast<int>(*it_lower);
 		upper_color[i] = static_cast<int>(*it_upper);
 	}
@@ -44,8 +49,8 @@ void ObjectDetector::load()
 void ObjectDetector::save()
 {
 	cv::FileStorage fs(obj_name, cv::FileStorage::WRITE);
-	fs << "lower_color" << "[" << lower_color[0] << lower_color[1] << lower_color[2] << "]";
-	fs << "upper_color" << "[" << upper_color[0] << upper_color[1] << upper_color[2] << "]";
+	fs << "lower_color" << "[" << lower_color[0] << lower_color[1] << lower_color[2] << lower_color[3] << "]";
+	fs << "upper_color" << "[" << upper_color[0] << upper_color[1] << upper_color[2] << upper_color[3] << "]";
 	fs.release();
 }
 
@@ -77,6 +82,13 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 	cvtColor(source_image, hsv_image, CV_BGR2HSV);	//转换为HSV色彩空间
 	Mat binary_image;
 	inRange(hsv_image, get_lower_color(), get_upper_color(), binary_image);	//按范围二值化
+
+	if (mixed_flag) {
+		Mat binary_image2;
+		inRange(hsv_image, get_lower_color(true), get_upper_color(true), binary_image2);
+		addWeighted(binary_image2, 1, binary_image, 1, 0, binary_image);
+	}
+
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
 		getStructuringElement(MORPH_RECT, Size(10, 10)));	//开操作降噪
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
@@ -144,20 +156,24 @@ void ObjectDetector::adjust_color()
 	cv::namedWindow(adjust_window_name, cv::WINDOW_AUTOSIZE);
 	createTrackbar("Low H", adjust_window_name, &lower_color[0], 180);
 	createTrackbar("Up H", adjust_window_name, &upper_color[0], 180);
-	createTrackbar("Low S", adjust_window_name, &lower_color[1], 255);
-	createTrackbar("Up S", adjust_window_name, &upper_color[1], 255);
-	createTrackbar("Low V", adjust_window_name, &lower_color[2], 255);
-	createTrackbar("Up V", adjust_window_name, &upper_color[2], 255);
+	if (mixed_flag) {
+		createTrackbar("Low H 2", adjust_window_name, &lower_color[1], 180);
+		createTrackbar("Up H 2", adjust_window_name, &upper_color[1], 180);
+	}
+	createTrackbar("Low S", adjust_window_name, &lower_color[2], 255);
+	createTrackbar("Up S", adjust_window_name, &upper_color[2], 255);
+	createTrackbar("Low V", adjust_window_name, &lower_color[3], 255);
+	createTrackbar("Up V", adjust_window_name, &upper_color[3], 255);
 }
 
-cv::Scalar ObjectDetector::get_lower_color()
+cv::Scalar ObjectDetector::get_lower_color(bool second_hue)
 {
-	return cv::Scalar(lower_color);
+	return cv::Scalar(lower_color[second_hue], lower_color[2], lower_color[3]);
 }
 
-cv::Scalar ObjectDetector::get_upper_color()
+cv::Scalar ObjectDetector::get_upper_color(bool second_hue)
 {
-	return cv::Scalar(upper_color);
+	return cv::Scalar(upper_color[second_hue], upper_color[2], upper_color[3]);
 }
 
 int ObjectDetector::width() const

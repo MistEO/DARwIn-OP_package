@@ -27,7 +27,7 @@ class ObjectDetector
 {
 public:
 	//构造函数，参数为名称、显示窗口标识
-	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow);
+	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow, bool blend_color = false);
 	//析构函数，会保存颜色的值为文件
 	~ObjectDetector();
 
@@ -62,15 +62,16 @@ private:
 	int x_axis() const;
 	int y_axis() const;
 
-	cv::Scalar get_lower_color();
-	cv::Scalar get_upper_color();
+	cv::Scalar get_lower_color(bool second_hue = false);
+	cv::Scalar get_upper_color(bool second_hue = false);
 
 	static cv::VideoCapture capture;
 	
 	const std::string obj_name;
 	int show_flag;
+	bool mixed_flag;
 
-	cv::Vec3i lower_color, upper_color;
+	cv::Vec4i lower_color, upper_color;
 	cv::Rect rect;
 	
 };
