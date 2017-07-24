@@ -136,7 +136,16 @@ void Motion::head_move(int x, int y, bool home)
 
 void Motion::action(int index)
 {
-	Robot::Action::GetInstance()->Start(index);
-	while (Robot::Action::GetInstance()->IsRunning())
-		usleep(8 * 1000);
+	using namespace Robot;
+	Walking::GetInstance()->Stop();
+	while(Walking::GetInstance()->IsRunning() == 1)
+		usleep(8000);
+	Action::GetInstance()->m_Joint.SetEnableBody(true, true);
+
+	Action::GetInstance()->Start(index);
+
+	while(Action::GetInstance()->IsRunning() == 1) usleep(8000);
+
+	Head::GetInstance()->m_Joint.SetEnableHeadOnly(true, true);
+	Walking::GetInstance()->m_Joint.SetEnableBodyWithoutHead(true, true);
 }
