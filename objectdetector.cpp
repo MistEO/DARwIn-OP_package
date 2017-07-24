@@ -198,10 +198,10 @@ int ObjectDetector::x_axis() const
 
 int ObjectDetector::y_axis() const
 {
-	return rect.y + (rect.height / 2);
+	return rect.br().y;
 }
 
-std::pair<int, int> ObjectDetector::central_point() const
+std::pair<int, int> ObjectDetector::anchor_point() const
 {
 	return std::pair<int, int>(x_axis(), y_axis());
 }

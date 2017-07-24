@@ -27,7 +27,7 @@ class ObjectDetector
 {
 public:
 	//构造函数，参数为名称、显示窗口标识
-	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow, bool blend_color = false);
+	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow, bool mixed_hue = false);
 	//析构函数，会保存颜色的值为文件
 	~ObjectDetector();
 
@@ -47,7 +47,7 @@ public:
 	int width() const;
 	int height() const;
 	int postion() const;
-	std::pair<int, int> central_point() const;
+	std::pair<int, int> anchor_point() const;
 	bool empty() const;
 	
 	//获取显示窗口标识，同时也可以直接设置（obj.imshow_flag() = ShowBinary)
