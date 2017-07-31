@@ -27,18 +27,19 @@ class ObjectDetector
 {
 public:
 	//构造函数，参数为名称、显示窗口标识
-	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow, bool mixed_hue = false);
+	ObjectDetector(const std::string & obj_name, int imshow_flag = NotShow,
+		bool mixed_hue = false, double scale = 1.0);
 	//析构函数，会保存颜色的值为文件
 	~ObjectDetector();
 
 	//刷新视频画面，参数为刷新次数
-	void refresh_capture(int times = 2);
+	void refresh_capture(int times = 3);
 
 	//视频宽度、高度
-	static const double cap_width;
-	static const double cap_height;
+	const double cap_width;
+	const double cap_height;
 
-	//调整颜色，析构函数会自动保存
+	//调整颜色，按ESC退出，会自动保存
 	void adjust_color();
 	//按颜色处理图像，参数为处理间隔时间（毫秒）
 	int process_by_color(int wait_msec, int rect_filter = NotFilter);
@@ -64,12 +65,14 @@ private:
 
 	cv::Scalar get_lower_color(bool second_hue = false);
 	cv::Scalar get_upper_color(bool second_hue = false);
+	cv::Scalar get_avg_color();
 
 	static cv::VideoCapture capture;
 	
-	const std::string obj_name;
+	std::string obj_name;
 	int show_flag;
 	bool mixed_flag;
+	double scale;
 
 	cv::Vec4i lower_color, upper_color;
 	cv::Rect rect;

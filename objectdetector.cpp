@@ -6,21 +6,23 @@
 #include <cassert>
 
 cv::VideoCapture ObjectDetector::capture(0);
-const double ObjectDetector::cap_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-const double ObjectDetector::cap_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag, bool mixed_hue)
-	:obj_name(obj_name), show_flag(imshow_flag), mixed_flag(mixed_hue),
+ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag,
+	bool mixed_hue, double scale)
+	:cap_width(capture.get(CV_CAP_PROP_FRAME_WIDTH) * scale),
+	cap_height(capture.get(CV_CAP_PROP_FRAME_HEIGHT) * scale),
+	obj_name(obj_name), show_flag(imshow_flag),
+	mixed_flag(mixed_hue), scale(scale),
 	lower_color(0, 0, 0, 0), upper_color(180, 180, 255, 255),
 	rect(cap_width / 2, cap_height / 2, 0, 0)
 {
 	assert(capture.isOpened());
 	load();
+	cv::namedWindow(obj_name, CV_WINDOW_NORMAL);
 }
 
 ObjectDetector::~ObjectDetector()
 {
-	save();
 }
 
 void ObjectDetector::load()
@@ -78,8 +80,12 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 		return -1;
 	}
 
+	Mat resize_image;
+	resize(source_image, resize_image,
+		Size(source_image.cols * scale, source_image.rows * scale));	//按比例缩放图像
+
 	Mat hsv_image;
-	cvtColor(source_image, hsv_image, CV_BGR2HSV);	//转换为HSV色彩空间
+	cvtColor(resize_image, hsv_image, CV_BGR2HSV);	//转换为HSV色彩空间
 	Mat binary_image;
 	inRange(hsv_image, get_lower_color(), get_upper_color(), binary_image);	//按范围二值化
 
@@ -120,9 +126,9 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 
 	//显示的窗口
 	if (show_flag != NotShow) {
-		Mat show_image = Mat::zeros(source_image.size(), source_image.type());
+		Mat show_image = Mat::zeros(resize_image.size(), resize_image.type());
 		if (show_flag & ShowSource) {	//显示原图片
-			show_image = source_image.clone();
+			show_image = resize_image.clone();
 		}
 		if (show_flag & ShowBinary) {	//显示二值化部分
 			Mat bgr_binary_image;
@@ -141,7 +147,7 @@ int ObjectDetector::process_by_color(int wait_msec, int rect_filter)
 				Point(rect.x + rect.width / 2, rect.y),
 				Point(rect.x + rect.width / 2, rect.y + rect.height),
 				Scalar(0, 0, 255), 2);		//画最大矩形中线
-			rectangle(show_image, rect, cv::Scalar(255, 255, 255), 2);	//画最大矩形
+			rectangle(show_image, rect, get_avg_color(), 2);	//画最大矩形
 		}
 		cv::imshow(obj_name, show_image);
 	}
@@ -164,6 +170,13 @@ void ObjectDetector::adjust_color()
 	createTrackbar("Up S", adjust_window_name, &upper_color[2], 255);
 	createTrackbar("Low V", adjust_window_name, &lower_color[3], 255);
 	createTrackbar("Up V", adjust_window_name, &upper_color[3], 255);
+
+	int c = 0;
+	while (c != 27) {
+		c = process_by_color(40);
+	}
+	save();
+	cv::destroyWindow(adjust_window_name);
 }
 
 cv::Scalar ObjectDetector::get_lower_color(bool second_hue)
@@ -176,19 +189,32 @@ cv::Scalar ObjectDetector::get_upper_color(bool second_hue)
 	return cv::Scalar(upper_color[second_hue], upper_color[2], upper_color[3]);
 }
 
+cv::Scalar avg(const cv::Scalar & lhs, const cv::Scalar & rhs)
+{
+	return cv::Scalar((lhs[0] + rhs[0]) / 2, (lhs[1] + rhs[1]) / 2, (lhs[0] + rhs[1]) / 2);
+}
+
+cv::Scalar ObjectDetector::get_avg_color()
+{
+	cv::Scalar avg_temp = avg(get_lower_color(), get_upper_color());
+	if (mixed_flag) //混合色求平均，懒得写了凑合用吧-。-
+		avg_temp[0] = 0; 
+	return avg_temp;
+}
+
 int ObjectDetector::width() const
 {
-	return rect.width;
+	return rect.width * scale;
 }
 
 int ObjectDetector::height() const
 {
-	return rect.height;
+	return rect.height * scale;
 }
 
 int ObjectDetector::postion() const
 {
-	return x_axis();
+	return x_axis() * scale;
 }
 
 int ObjectDetector::x_axis() const
@@ -203,7 +229,8 @@ int ObjectDetector::y_axis() const
 
 std::pair<int, int> ObjectDetector::anchor_point() const
 {
-	return std::pair<int, int>(x_axis(), y_axis());
+	return std::pair<int, int>
+		(x_axis() * scale, y_axis() * scale);
 }
 
 bool ObjectDetector::empty() const
