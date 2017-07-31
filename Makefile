@@ -1,5 +1,5 @@
 SOURCES = sample.cpp motion.cpp objectdetector.cpp
-TARGET = Run
+TARGET = Sample
 
 
 OBJECTS = ${SOURCES:.cpp=.o}
