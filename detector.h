@@ -19,15 +19,19 @@ public:
 	void set_scale(double scale);
 	
 	void insert(const std::string & name,
-		int show_flag = NotShow, bool mixed_flag = false);
+		int count = 1, int show_flag = NotShow, bool mixed_flag = false);
 	void erase(const std::string & name);
 	void clear();
 	
-	void refresh(uint times = 1);
-	void process(const std::string & object_name);
+	int refresh(uint times = 1);
+	void process(const std::string & object_name, const std::string & window_name = "");
+	void adjust_color(const std::string & object_name, int confirm_keycode = 13, int cancel_keycode = 27);
 	void show();
 	
 private:
+	void load(const std::string & name);
+	void save(const std::string & name);
+
 	Detector();
 	static Detector unique_ins;
 	

@@ -1,8 +1,8 @@
 #include "objectinfo.h"
 
-ObjectInfo::ObjectInfo(int show_flag, bool mixed_flag)
-	: show(show_flag), mixed(mixed_flag),
-	rect_set()
+ObjectInfo::ObjectInfo(int count, int show_flag, bool mixed_flag)
+	: count(count), show(show_flag), mixed(mixed_flag),
+	lower(0, 0, 0, 0), upper(181, 181, 256, 256)
 {
 	
 }
