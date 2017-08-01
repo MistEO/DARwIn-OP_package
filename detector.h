@@ -19,7 +19,7 @@ public:
 	void set_scale(double scale);
 	
 	void insert(const std::string & name,
-		int count = 1, int show_flag = ShowDrawing, bool mixed_flag = false);
+		bool mixed_flag = false, int count = 1, int show_flag = ShowDrawing);
 	void erase(const std::string & name);
 	void clear();
 	

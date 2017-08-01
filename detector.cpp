@@ -2,7 +2,6 @@
 #include <iostream>
 
 const char * WindowName = "Detector";
-const char * YAMLPath = "hsv-value.yaml";
 
 Detector Detector::unique_ins;
 
@@ -32,9 +31,9 @@ void Detector::set_scale(double scale)
 }
 
 void Detector::insert(const std::string & name,
-	int count, int show_flag, bool mixed_flag)
+	bool mixed_flag, int count, int show_flag)
 {
-	object_map[name] = ObjectInfo(count, show_flag, mixed_flag);
+	object_map[name] = ObjectInfo(mixed_flag, count, show_flag);
 	load(name);
 }
 
@@ -71,7 +70,7 @@ void Detector::process(const std::string & object_name, const std::string & wind
 	inRange(hsv_image, oinfo.get_lower(), oinfo.get_upper(), binary_image);
 	if (oinfo.mixed) {
 		Mat binary_image2;
-		inRange(hsv_image, oinfo.get_lower(), oinfo.get_upper(), binary_image2);
+		inRange(hsv_image, oinfo.get_lower(true), oinfo.get_upper(true), binary_image2);
 		addWeighted(binary_image2, 1, binary_image, 1, 0, binary_image);
 	}
 
@@ -161,9 +160,9 @@ void Detector::show()
 
 void Detector::load(const std::string & name)
 {
-	cv::FileStorage fs(YAMLPath, cv::FileStorage::READ);
+	cv::FileStorage fs(name+".yaml", cv::FileStorage::READ);
 	if (!fs.isOpened()) {
-		std::clog << "Cannot read file: " << YAMLPath << std::endl;
+		std::clog << "Cannot read file: " << name + ".yaml" << std::endl;
 		return;
 	}
 	ObjectInfo & oinfo = object_map[name];
@@ -180,7 +179,7 @@ void Detector::load(const std::string & name)
 
 void Detector::save(const std::string & name)
 {
-	cv::FileStorage fs(YAMLPath, cv::FileStorage::WRITE);
+	cv::FileStorage fs(name + ".yaml", cv::FileStorage::WRITE);
 	ObjectInfo & oinfo = object_map[name];
 	fs << name + "-lower" << "[" << oinfo.lower[0] << oinfo.lower[1] << oinfo.lower[2] << oinfo.lower[3] << "]";
 	fs << name + "-upper" << "[" << oinfo.upper[0] << oinfo.upper[1] << oinfo.upper[2] << oinfo.upper[3] << "]";

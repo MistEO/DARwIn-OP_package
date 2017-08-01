@@ -21,15 +21,15 @@ struct RectCompare {
 
 class ObjectInfo {
 public:
-	explicit ObjectInfo(int count = 1, int show_flag = ShowDrawing, bool mixed_flag = false);
+	explicit ObjectInfo(bool mixed_flag = false, int count = 1, int show_flag = ShowDrawing);
 
 	cv::Scalar get_lower(bool second_hue = false);
 	cv::Scalar get_upper(bool second_hue = false);
 	cv::Scalar get_average();
 
+	bool mixed;
 	int count;
 	int show;
-	bool mixed;
 	cv::Vec4i lower, upper;
 	std::set<cv::Rect, RectCompare> rect_set;
 };
