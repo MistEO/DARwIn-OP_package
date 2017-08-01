@@ -13,7 +13,7 @@ ObjectDetector::ObjectDetector(const std::string & obj_name, int imshow_flag,
 	cap_height(capture.get(CV_CAP_PROP_FRAME_HEIGHT) * scale),
 	obj_name(obj_name), show_flag(imshow_flag),
 	mixed_flag(mixed_hue), scale(scale),
-	lower_color(0, 0, 0, 0), upper_color(180, 180, 255, 255),
+	lower_color(0, 0, 0, 0), upper_color(181, 181, 256, 256),
 	rect(cap_width / 2, cap_height / 2, 0, 0)
 {
 	assert(capture.isOpened());
@@ -160,16 +160,16 @@ void ObjectDetector::adjust_color()
 
 	const std::string adjust_window_name = obj_name + " - Adjust Color";
 	cv::namedWindow(adjust_window_name, cv::WINDOW_AUTOSIZE);
-	createTrackbar("Low H", adjust_window_name, &lower_color[0], 180);
-	createTrackbar("Up H", adjust_window_name, &upper_color[0], 180);
+	createTrackbar("Low H", adjust_window_name, &lower_color[0], 181);
+	createTrackbar("Up H", adjust_window_name, &upper_color[0], 181);
 	if (mixed_flag) {
-		createTrackbar("Low H 2", adjust_window_name, &lower_color[1], 180);
-		createTrackbar("Up H 2", adjust_window_name, &upper_color[1], 180);
+		createTrackbar("Low H 2", adjust_window_name, &lower_color[1], 181);
+		createTrackbar("Up H 2", adjust_window_name, &upper_color[1], 181);
 	}
-	createTrackbar("Low S", adjust_window_name, &lower_color[2], 255);
-	createTrackbar("Up S", adjust_window_name, &upper_color[2], 255);
-	createTrackbar("Low V", adjust_window_name, &lower_color[3], 255);
-	createTrackbar("Up V", adjust_window_name, &upper_color[3], 255);
+	createTrackbar("Low S", adjust_window_name, &lower_color[2], 256);
+	createTrackbar("Up S", adjust_window_name, &upper_color[2], 256);
+	createTrackbar("Low V", adjust_window_name, &lower_color[3], 256);
+	createTrackbar("Up V", adjust_window_name, &upper_color[3], 256);
 
 	int c = 0;
 	while (c != 27) {
