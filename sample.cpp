@@ -2,9 +2,9 @@
 
 int main(int argc, char ** argv)
 {
-	Detector::ins().insert("test", true);
+	Detector::ins().insert("test", false, 2);
 	Detector::ins().adjust_color("test");
-	Detector::ins().insert("test2");
+	Detector::ins().insert("test2", true);
 	Detector::ins().adjust_color("test2");
 	while (true) {
 		Detector::ins().refresh();

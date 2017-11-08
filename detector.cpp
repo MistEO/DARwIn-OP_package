@@ -102,11 +102,11 @@ void Detector::process(const std::string & object_name, const std::string & wind
 			Point(show_image.cols / 2, show_image.rows),
 			Scalar(255, 0, 0), 2);		//画图像中轴线
 		if (!oinfo.rect_set.empty()) {
-			rectangle(show_image, *oinfo.rect_set.begin(), oinfo.get_average(), 2);	//画最大矩形
 			for (std::set<cv::Rect, RectCompare>::iterator i = oinfo.rect_set.begin();
 				i != oinfo.rect_set.end(); ++i) {	//画所有矩形
 				rectangle(show_image, *i, cv::Scalar(0, 0, 0), 1);
 			}
+			rectangle(show_image, *oinfo.rect_set.begin(), oinfo.get_average(), 2);	//画最大矩形
 		}
 		imshow(window_name, show_image);
 	}
@@ -152,9 +152,11 @@ void Detector::show()
 		for (std::set<cv::Rect, RectCompare>::iterator j = i->second.rect_set.begin();
 			i->second.show & ShowDrawing && j != i->second.rect_set.end() && rectangle_count != i->second.count;
 			++j, ++rectangle_count) {
+			std::cout << i->second.get_average();
 			cv::rectangle(show_image, *j, i->second.get_average());
 		}
 	}
+	std::cout << std::endl;
 	cv::imshow(WindowName, show_image);
 }
 

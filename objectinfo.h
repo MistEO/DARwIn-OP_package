@@ -1,5 +1,6 @@
 #pragma once
 
+#include <opencv2/video/tracking.hpp>
 #include <opencv2/core/core.hpp>
 #include <string>
 #include <set>
@@ -30,6 +31,8 @@ public:
 	bool mixed;
 	int count;
 	int show;
+
+	//[0]:H [1]:H2 [2]:S [3]:V
 	cv::Vec4i lower, upper;
 	std::set<cv::Rect, RectCompare> rect_set;
 };
