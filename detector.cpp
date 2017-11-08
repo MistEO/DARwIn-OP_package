@@ -67,6 +67,7 @@ void Detector::process(const std::string & object_name, const std::string & wind
 	using namespace cv;
 	ObjectInfo & oinfo = object_map[object_name];
 	Mat binary_image;
+	//按范围二值化，前开后闭
 	inRange(hsv_image, oinfo.get_lower(), oinfo.get_upper(), binary_image);
 	if (oinfo.mixed) {
 		Mat binary_image2;
@@ -106,10 +107,51 @@ void Detector::process(const std::string & object_name, const std::string & wind
 				i != oinfo.rect_set.end(); ++i) {	//画所有矩形
 				rectangle(show_image, *i, cv::Scalar(0, 0, 0), 1);
 			}
-			rectangle(show_image, *oinfo.rect_set.begin(), oinfo.get_average(), 2);	//画最大矩形
+			std::set<cv::Rect, RectCompare>::const_iterator iter = oinfo.rect_set.begin();
+			for (int i = 0; i != oinfo.count && iter != oinfo.rect_set.end(); ++i, ++iter) {
+				rectangle(show_image, *iter, oinfo.get_average(), 2);	//画最大几个矩形
+			}
 		}
 		imshow(window_name, show_image);
 	}
+}
+
+int Detector::get_rect_attr(const std::string & object_name, const int order, RectAttr attr) const
+{
+	for (std::map<std::string, ObjectInfo>::const_iterator i = object_map.begin();
+		i != object_map.end(); ++i) {
+		int rectangle_count = 0;
+		for (std::set<cv::Rect, RectCompare>::const_iterator j = i->second.rect_set.begin();
+			j != i->second.rect_set.end();
+			++j, ++rectangle_count) {
+			if (rectangle_count == order) {
+				switch (attr)
+				{
+				case LeftX:
+					return j->x;
+				case RightX:
+					return j->br().x;
+				case TopY:
+					return j->y;
+				case BottomY:
+					return j->br().y;
+				case CenterX:
+					return (j->x + j->br().x) / 2;
+				case CenterY:
+					return (j->y + j->br().y) / 2;
+				case Height:
+					return j->height;
+				case Width:
+					return j->width;
+				case Area:
+					return j->area();
+				default:
+					return -1;
+				}
+			}
+		}
+	}
+	return -2;
 }
 
 void Detector::adjust_color(const std::string & object_name, int confirm_keycode, int cancel_keycode)
@@ -152,17 +194,15 @@ void Detector::show()
 		for (std::set<cv::Rect, RectCompare>::iterator j = i->second.rect_set.begin();
 			i->second.show & ShowDrawing && j != i->second.rect_set.end() && rectangle_count != i->second.count;
 			++j, ++rectangle_count) {
-			std::cout << i->second.get_average();
-			cv::rectangle(show_image, *j, i->second.get_average());
+			cv::rectangle(show_image, *j, i->second.get_average(), 2);
 		}
 	}
-	std::cout << std::endl;
 	cv::imshow(WindowName, show_image);
 }
 
 void Detector::load(const std::string & name)
 {
-	cv::FileStorage fs(name+".yaml", cv::FileStorage::READ);
+	cv::FileStorage fs(name + ".yaml", cv::FileStorage::READ);
 	if (!fs.isOpened()) {
 		std::clog << "Cannot read file: " << name + ".yaml" << std::endl;
 		return;
