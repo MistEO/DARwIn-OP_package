@@ -27,7 +27,7 @@ public:
 	void set_scale(double scale);
 	//插入新的追踪色
 	void insert(const std::string & name,
-		bool mixed_flag = false, int count = 1, int show_flag = ShowDrawing);
+		bool mixed_flag = false, int count = 1);
 	//删除某个追踪色
 	void erase(const std::string & name);
 	//清空所有

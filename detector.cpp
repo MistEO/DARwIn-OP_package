@@ -31,9 +31,9 @@ void Detector::set_scale(double scale)
 }
 
 void Detector::insert(const std::string & name,
-	bool mixed_flag, int count, int show_flag)
+	bool mixed_flag, int count)
 {
-	object_map[name] = ObjectInfo(mixed_flag, count, show_flag);
+	object_map[name] = ObjectInfo(mixed_flag, count);
 	load(name);
 }
 
@@ -67,14 +67,14 @@ void Detector::process(const std::string & object_name, const std::string & wind
 	using namespace cv;
 	ObjectInfo & oinfo = object_map[object_name];
 	Mat binary_image;
-	//按范围二值化，前开后闭
+	//按范围二值化，区间前开后闭
 	inRange(hsv_image, oinfo.get_lower(), oinfo.get_upper(), binary_image);
+	//合并混合色的二值化图像
 	if (oinfo.mixed) {
 		Mat binary_image2;
 		inRange(hsv_image, oinfo.get_lower(true), oinfo.get_upper(true), binary_image2);
 		addWeighted(binary_image2, 1, binary_image, 1, 0, binary_image);
 	}
-
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
 		getStructuringElement(MORPH_RECT, Size(10 * scale, 10 * scale)));	//开操作降噪
 	morphologyEx(binary_image, binary_image, CV_MOP_OPEN,
@@ -89,9 +89,10 @@ void Detector::process(const std::string & object_name, const std::string & wind
 	oinfo.rect_set.clear();
 	for (vector<vector<Point> >::iterator i = all_contours.begin();
 		i != all_contours.end(); ++i) {
-		oinfo.rect_set.insert(boundingRect(Mat(*i)));
+		oinfo.rect_set.insert(boundingRect(Mat(*i)));//从轮廓提取矩形，并加入set
 	}
 
+	//画某一个颜色的show_image
 	if (!window_name.empty()) {
 		Mat show_image = Mat::zeros(scale_image.size(), scale_image.type());
 		show_image = scale_image.clone();
@@ -192,7 +193,7 @@ void Detector::show()
 
 		int rectangle_count = 0;
 		for (std::set<cv::Rect, RectCompare>::iterator j = i->second.rect_set.begin();
-			i->second.show & ShowDrawing && j != i->second.rect_set.end() && rectangle_count != i->second.count;
+			j != i->second.rect_set.end() && rectangle_count != i->second.count;
 			++j, ++rectangle_count) {
 			cv::rectangle(show_image, *j, i->second.get_average(), 2);
 		}

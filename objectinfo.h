@@ -5,14 +5,6 @@
 #include <string>
 #include <set>
 
-//显示窗口标识
-enum ShowImage {
-	NotShow = 0,
-	DetachShow = 1,
-	ShowBinary = 2,
-	ShowDrawing = 4,
-};
-
 //比较cv::Rect面积
 struct RectCompare {
 	 bool operator()(const cv::Rect& lhs, const cv::Rect& rhs)
@@ -25,7 +17,7 @@ struct RectCompare {
 //若为红色类似色，Hue值需要取0或180附近共两部分，则可通过设置mixed=true，同时保存两端Hue值
 class ObjectInfo {
 public:
-	explicit ObjectInfo(bool mixed_flag = false, int count = 1, int show_flag = ShowDrawing);
+	explicit ObjectInfo(bool mixed_flag = false, int count = 1);
 
 	//获取颜色下限、上限
 	cv::Scalar get_lower(bool second_hue = false);
@@ -37,8 +29,6 @@ public:
 	bool mixed;
 	//物体数量
 	int count;
-	//显示窗口标识
-	int show;
 
 	//下限颜色和上限颜色
 	//[0]:H值 [1]:H2第二部分，若不是红色则为0 [2]:S [3]:V
