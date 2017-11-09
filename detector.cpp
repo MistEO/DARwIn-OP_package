@@ -1,5 +1,6 @@
 #include "detector.h"
 #include <iostream>
+#include <cassert>
 
 const char * WindowName = "Detector";
 
@@ -65,6 +66,7 @@ int Detector::refresh(uint times)
 void Detector::process(const std::string & object_name, const std::string & window_name)
 {
 	using namespace cv;
+	assert(object_map.find(object_name) != object_map.end());
 	ObjectInfo & oinfo = object_map[object_name];
 	Mat binary_image;
 	//按范围二值化，区间前开后闭
@@ -119,13 +121,13 @@ void Detector::process(const std::string & object_name, const std::string & wind
 
 int Detector::get_rect_attr(const std::string & object_name, const int order, RectAttr attr) const
 {
+	assert(object_map.find(object_name) != object_map.end());
 	for (std::map<std::string, ObjectInfo>::const_iterator i = object_map.begin();
 		i != object_map.end(); ++i) {
-		int rectangle_count = 0;
 		for (std::set<cv::Rect, RectCompare>::const_iterator j = i->second.rect_set.begin();
 			j != i->second.rect_set.end();
-			++j, ++rectangle_count) {
-			if (rectangle_count == order) {
+			++j) {
+			if (i->second.count == order) {
 				switch (attr)
 				{
 				case LeftX:
@@ -158,7 +160,7 @@ int Detector::get_rect_attr(const std::string & object_name, const int order, Re
 void Detector::adjust_color(const std::string & object_name, int confirm_keycode, int cancel_keycode)
 {
 	using cv::createTrackbar;
-
+	assert(object_map.find(object_name) != object_map.end());
 	ObjectInfo & oinfo = object_map[object_name];
 	const std::string adjust_window_name = object_name + " - Adjust Color";
 	cv::namedWindow(adjust_window_name, cv::WINDOW_AUTOSIZE);
